@@ -1,0 +1,103 @@
+name: Build venv llama-cpp-python (Windows)
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag (ex: v1.0.0)"
+        required: true
+        default: "v1.0.0"
+
+jobs:
+  build:
+    name: Build & Release (Windows 11)
+    runs-on: windows-11-2025
+
+    env:
+      PYTHON_VERSION: "3.10.2"
+      VENV_DIR: ".venv"
+      ARTIFACT_NAME: "venv-llama-cpp-python-win11-py3.10.2.zip"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify Python version
+        run: python --version
+
+      - name: Create virtual environment
+        run: python -m venv ${{ env.VENV_DIR }}
+
+      - name: Upgrade pip inside venv
+        run: ${{ env.VENV_DIR }}\Scripts\pip install --upgrade pip
+
+      - name: Install llama-cpp-python (pre-built CPU wheel)
+        run: |
+          ${{ env.VENV_DIR }}\Scripts\pip install llama-cpp-python `
+            --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+        continue-on-error: true
+        id: install_prebuilt
+
+      - name: Install llama-cpp-python (compile from source fallback)
+        if: steps.install_prebuilt.outcome == 'failure'
+        run: |
+          ${{ env.VENV_DIR }}\Scripts\pip install llama-cpp-python
+        env:
+          CMAKE_ARGS: "-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
+
+      - name: Verify installation
+        run: ${{ env.VENV_DIR }}\Scripts\python -c "import llama_cpp; print('llama_cpp version:', llama_cpp.__version__)"
+
+      - name: Compress .venv
+        run: Compress-Archive -Path ${{ env.VENV_DIR }} -DestinationPath ${{ env.ARTIFACT_NAME }} -Force
+
+      - name: Show artifact size
+        run: (Get-Item ${{ env.ARTIFACT_NAME }}).Length / 1MB | ForEach-Object { "{0:N2} MB" -f $_ }
+
+      - name: Determine release tag
+        id: tag
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            echo "name=${{ github.event.inputs.tag_name }}" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "name=${{ github.ref_name }}" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: "venv llama-cpp-python ${{ steps.tag.outputs.name }} (Windows 11 / Python 3.10.2)"
+          body: |
+            ## Ambiente virtual Python pronto para uso
+
+            **Python:** 3.10.2
+            **OS:** Windows 11
+            **Libs:** `llama-cpp-python` (CPU)
+
+            ### Como usar
+
+            1. Baixe e extraia o `.zip` na raiz do seu projeto
+            2. Ative o ambiente:
+               ```bat
+               .venv\Scripts\activate
+               ```
+            3. Use normalmente.
+
+            > **Nota:** O `.venv` usa caminhos absolutos internamente. Após extrair, pode ser necessário recriar scripts de ativação:
+            > ```bat
+            > python -m venv --upgrade .venv
+            > ```
+          files: ${{ env.ARTIFACT_NAME }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
