@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Dict
+from typing import Generator, List, Dict, Any
 from llama_cpp import Llama
 from src import config
 
@@ -27,7 +27,6 @@ class LLMInference:
         max_tokens: int = config.MAX_TOKENS,
         temperature: float = config.TEMPERATURE,
     ) -> str:
-        """Raw text completion."""
         result = self.llm(prompt, max_tokens=max_tokens, temperature=temperature, echo=False)
         return result["choices"][0]["text"]
 
@@ -37,10 +36,22 @@ class LLMInference:
         max_tokens: int = config.MAX_TOKENS,
         temperature: float = config.TEMPERATURE,
     ) -> str:
-        """Chat completion using the OpenAI-compatible messages format."""
         result = self.llm.create_chat_completion(
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,
         )
         return result["choices"][0]["message"]["content"]
+
+    def stream_chat(
+        self,
+        messages: List[Dict[str, str]],
+        max_tokens: int = config.MAX_TOKENS,
+        temperature: float = config.TEMPERATURE,
+    ) -> Generator[Dict[str, Any], None, None]:
+        return self.llm.create_chat_completion(
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            stream=True,
+        )

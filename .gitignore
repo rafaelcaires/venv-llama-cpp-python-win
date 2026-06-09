@@ -2,6 +2,9 @@
 model/*.gguf
 model/*.bin
 
+# Environment — copy .env.example to .env and fill in values
+.env
+
 # Python
 __pycache__/
 *.py[cod]

@@ -1,15 +1,27 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-MODEL_DIR = os.path.join(_ROOT, "model")
-MODEL_FILENAME = "qwen2.5-7b-instruct-q4_k_m.gguf"
+# Model
+_model_dir_raw = os.getenv("MODEL_DIR", "model")
+MODEL_DIR = _model_dir_raw if os.path.isabs(_model_dir_raw) else os.path.join(_ROOT, _model_dir_raw)
+MODEL_FILENAME = os.getenv("MODEL_FILENAME", "qwen2.5-7b-instruct-q4_k_m.gguf")
 MODEL_PATH = os.path.join(MODEL_DIR, MODEL_FILENAME)
+MODEL_ID = os.getenv("MODEL_ID", "qwen2.5-7b-instruct")
+REPO_ID = os.getenv("REPO_ID", "Qwen/Qwen2.5-7B-Instruct-GGUF")
 
-REPO_ID = "Qwen/Qwen2.5-7B-Instruct-GGUF"
+# Inference
+N_CTX = int(os.getenv("N_CTX", "4096"))
+N_THREADS = int(os.getenv("N_THREADS", str(os.cpu_count() or 4)))
+N_GPU_LAYERS = int(os.getenv("N_GPU_LAYERS", "0"))
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", "512"))
 
-N_CTX = 4096
-N_THREADS = os.cpu_count() or 4
-N_GPU_LAYERS = 0
-TEMPERATURE = 0.7
-MAX_TOKENS = 512
+# Server
+HOST = os.getenv("HOST", "0.0.0.0")
+PORT = int(os.getenv("PORT", "8000"))
+API_KEY = os.getenv("API_KEY", "")
+AUTO_DOWNLOAD = os.getenv("AUTO_DOWNLOAD", "true").lower() == "true"
