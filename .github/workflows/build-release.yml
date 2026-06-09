@@ -37,7 +37,7 @@ jobs:
         run: python -m venv ${{ env.VENV_DIR }}
 
       - name: Upgrade pip inside venv
-        run: ${{ env.VENV_DIR }}\Scripts\pip install --upgrade pip
+        run: ${{ env.VENV_DIR }}\Scripts\python -m pip install --upgrade pip
 
       - name: Install llama-cpp-python (pre-built CPU wheel)
         run: |
