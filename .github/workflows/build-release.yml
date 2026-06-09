@@ -15,6 +15,8 @@ jobs:
   build:
     name: Build & Release (Windows 11)
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     env:
       PYTHON_VERSION: "3.10.2"
