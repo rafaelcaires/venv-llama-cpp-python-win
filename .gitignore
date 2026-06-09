@@ -1,0 +1,17 @@
+# Model files — too large for GitHub (4+ GB)
+model/*.gguf
+model/*.bin
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+dist/
+build/
+
+# HuggingFace cache
+.cache/
+
+# Artifacts
+*.zip
