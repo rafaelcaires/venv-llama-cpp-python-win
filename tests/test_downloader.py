@@ -1,6 +1,4 @@
-import os
-from unittest.mock import patch, MagicMock
-import pytest
+from unittest.mock import patch
 
 from src import config
 from src.downloader import download_model

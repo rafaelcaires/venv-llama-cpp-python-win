@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from typing import Generator, List, Dict, Any
-from llama_cpp import Llama
+from collections.abc import Generator
+from typing import Any
+
+from llama_cpp import Llama  # type: ignore[import-not-found]
+
 from src import config
 
 
@@ -12,7 +15,7 @@ class LLMInference:
         n_ctx: int = config.N_CTX,
         n_threads: int = config.N_THREADS,
         n_gpu_layers: int = config.N_GPU_LAYERS,
-    ):
+    ) -> None:
         self.llm = Llama(
             model_path=model_path,
             n_ctx=n_ctx,
@@ -28,11 +31,11 @@ class LLMInference:
         temperature: float = config.TEMPERATURE,
     ) -> str:
         result = self.llm(prompt, max_tokens=max_tokens, temperature=temperature, echo=False)
-        return result["choices"][0]["text"]
+        return result["choices"][0]["text"]  # type: ignore[index]
 
     def chat(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         max_tokens: int = config.MAX_TOKENS,
         temperature: float = config.TEMPERATURE,
     ) -> str:
@@ -41,15 +44,15 @@ class LLMInference:
             max_tokens=max_tokens,
             temperature=temperature,
         )
-        return result["choices"][0]["message"]["content"]
+        return result["choices"][0]["message"]["content"]  # type: ignore[index]
 
     def stream_chat(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         max_tokens: int = config.MAX_TOKENS,
         temperature: float = config.TEMPERATURE,
-    ) -> Generator[Dict[str, Any], None, None]:
-        return self.llm.create_chat_completion(
+    ) -> Generator[dict[str, Any], None, None]:
+        return self.llm.create_chat_completion(  # type: ignore[return-value]
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,

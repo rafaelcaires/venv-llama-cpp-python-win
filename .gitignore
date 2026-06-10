@@ -16,5 +16,9 @@ build/
 # HuggingFace cache
 .cache/
 
+# Coverage
+.coverage
+htmlcov/
+
 # Artifacts
 *.zip

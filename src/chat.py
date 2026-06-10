@@ -1,13 +1,16 @@
 """Interactive CLI chat with the loaded model."""
-import sys
-import os
 
+from __future__ import annotations
+
+import os
+import sys
+
+from src import config
 from src.downloader import download_model
 from src.inference import LLMInference
-from src import config
 
 
-def main():
+def main() -> None:
     if not os.path.exists(config.MODEL_PATH):
         download_model()
 
@@ -15,7 +18,9 @@ def main():
     llm = LLMInference()
     print("Model ready. Type 'exit' to quit.\n")
 
-    history = [{"role": "system", "content": "You are a helpful assistant."}]
+    history: list[dict[str, str]] = [
+        {"role": "system", "content": "You are a helpful assistant."}
+    ]
 
     while True:
         try:
@@ -37,5 +42,5 @@ def main():
         print(f"Assistant: {response}\n")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
