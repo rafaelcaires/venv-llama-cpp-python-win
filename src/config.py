@@ -18,7 +18,8 @@ REPO_ID = os.getenv("REPO_ID", "Qwen/Qwen2.5-Coder-3B-Instruct-GGUF")
 N_CTX = int(os.getenv("N_CTX", "4096"))
 N_THREADS = int(os.getenv("N_THREADS", str(os.cpu_count() or 4)))
 N_GPU_LAYERS = int(os.getenv("N_GPU_LAYERS", "0"))
-TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+N_BATCH = int(os.getenv("N_BATCH", "512"))
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.1"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "512"))
 
 # Server

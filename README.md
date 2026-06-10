@@ -124,7 +124,7 @@ print(list_gguf_files("bartowski/Qwen2.5-7B-Instruct-GGUF"))
 curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "qwen2.5-7b-instruct",
+    "model": "qwen2.5-coder-3b-instruct",
     "messages": [{"role": "user", "content": "Olá, como vai?"}],
     "max_tokens": 256
   }'
@@ -135,7 +135,7 @@ Com streaming:
 ```bash
 curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model": "qwen2.5-7b-instruct", "messages": [{"role": "user", "content": "Olá"}], "stream": true}'
+  -d '{"model": "qwen2.5-coder-3b-instruct", "messages": [{"role": "user", "content": "Olá"}], "stream": true}'
 ```
 
 Com autenticação (quando `API_KEY` está definida):
@@ -157,20 +157,46 @@ Use a extensão **[Continue.dev](https://marketplace.visualstudio.com/items?item
 Edite `~/.continue/config.yaml` (ou `%USERPROFILE%\.continue\config.yaml` no Windows):
 
 ```yaml
+name: Qwen Coder GGUF Local
+version: 1.0.0
+schema: v1
+
 models:
-  - title: Qwen 2.5 Coder 3B (local)
+  - name: Qwen 2.5 Coder 3B (local)
     provider: openai
     model: qwen2.5-coder-3b-instruct
-    apiBase: http://localhost:8000
-    apiKey: local
+    apiBase: "http://localhost:8000/v1"
+    apiKey: "local"
+    roles:
+      - chat
+      - edit
+      - apply
+    requestOptions:
+      timeout: 120
+    defaultCompletionOptions:
+      temperature: 0.1
+      maxTokens: 512
 
 tabAutocompleteModel:
-  title: Qwen 2.5 Coder 3B Autocomplete
+  name: Qwen 2.5 Coder 3B Autocomplete
   provider: openai
   model: qwen2.5-coder-3b-instruct
-  apiBase: http://localhost:8000
-  apiKey: local
+  apiBase: "http://localhost:8000/v1"
+  apiKey: "local"
+  requestOptions:
+    timeout: 30
+  defaultCompletionOptions:
+    temperature: 0.0
+    maxTokens: 256
 ```
+
+#### Por que esses valores?
+
+| Parâmetro | Chat | Autocomplete | Motivo |
+|---|---|---|---|
+| `maxTokens` | 512 | 256 | Menos tokens = resposta mais rápida |
+| `temperature` | 0.1 | 0.0 | Código precisa de determinismo, não criatividade |
+| `timeout` | 120s | 30s | Autocomplete deve ser rápido ou desistir |
 
 ---
 

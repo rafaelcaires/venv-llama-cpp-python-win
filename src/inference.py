@@ -15,12 +15,14 @@ class LLMInference:
         n_ctx: int = config.N_CTX,
         n_threads: int = config.N_THREADS,
         n_gpu_layers: int = config.N_GPU_LAYERS,
+        n_batch: int = config.N_BATCH,
     ) -> None:
         self.llm = Llama(
             model_path=model_path,
             n_ctx=n_ctx,
             n_threads=n_threads,
             n_gpu_layers=n_gpu_layers,
+            n_batch=n_batch,
             verbose=False,
         )
 
