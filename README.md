@@ -1,7 +1,8 @@
 # venv-llama-cpp-python-win
 
 Ambiente virtual Python 3.10.2 para Windows 11 com `llama-cpp-python` pré-instalado, exposto como uma **API REST compatível com OpenAI** via FastAPI + uvicorn.  
-Integra com o [Continue.dev](https://marketplace.visualstudio.com/items?itemName=Continue.continue) no VSCode como alternativa local ao GitHub Copilot.
+Integra com o [Continue.dev](https://marketplace.visualstudio.com/items?itemName=Continue.continue) no VSCode como alternativa local ao GitHub Copilot.  
+Usa o **Qwen3-4B** por padrão — geração de código de alta qualidade com suporte a contexto longo (128k tokens).
 
 ---
 
@@ -38,10 +39,10 @@ cp .env.example .env
 
 | Variável | Padrão | Descrição |
 |---|---|---|
-| `MODEL_FILENAME` | `qwen2.5-coder-3b-instruct-q4_k_m.gguf` | Nome do arquivo GGUF |
+| `MODEL_FILENAME` | `qwen3-4b-q4_k_m.gguf` | Nome do arquivo GGUF |
 | `MODEL_DIR` | `model` | Pasta onde o modelo é armazenado |
-| `MODEL_ID` | `qwen2.5-coder-3b-instruct` | ID reportado pelo endpoint `/v1/models` |
-| `REPO_ID` | `Qwen/Qwen2.5-Coder-3B-Instruct-GGUF` | Repositório do Hugging Face |
+| `MODEL_ID` | `qwen3-4b` | ID reportado pelo endpoint `/v1/models` |
+| `REPO_ID` | `Qwen/Qwen3-4B-GGUF` | Repositório do Hugging Face |
 | `N_CTX` | `4096` | Tamanho da janela de contexto em tokens |
 | `N_THREADS` | `(núcleos CPU)` | Threads de CPU para inferência |
 | `N_GPU_LAYERS` | `0` | Camadas na GPU (0 = somente CPU) |
@@ -125,7 +126,7 @@ print(list_gguf_files("Qwen/Qwen2.5-Coder-3B-Instruct-GGUF"))
 curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "qwen2.5-coder-3b-instruct",
+    "model": "qwen3-4b",
     "messages": [{"role": "user", "content": "Explique este código"}],
     "max_tokens": 512
   }'
@@ -136,7 +137,7 @@ Com streaming:
 ```bash
 curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model": "qwen2.5-coder-3b-instruct", "messages": [{"role": "user", "content": "Olá"}], "stream": true}'
+  -d '{"model": "qwen3-4b", "messages": [{"role": "user", "content": "Olá"}], "stream": true}'
 ```
 
 Com autenticação (quando `API_KEY` está definida):
@@ -169,14 +170,14 @@ copy continue.config.yaml %USERPROFILE%\.continue\config.yaml
 Conteúdo completo do arquivo:
 
 ```yaml
-name: Qwen Coder GGUF Local
+name: Qwen3 GGUF Local
 version: 1.0.0
 schema: v1
 
 models:
-  - name: Qwen 2.5 Coder 3B - Chat
+  - name: Qwen3 4B - Chat
     provider: openai
-    model: qwen2.5-coder-3b-instruct
+    model: qwen3-4b
     apiBase: "http://localhost:8000/v1"
     apiKey: "local"
     roles:
@@ -189,9 +190,9 @@ models:
       temperature: 0.1
       maxTokens: 512
 
-  - name: Qwen 2.5 Coder 3B - Autocomplete
+  - name: Qwen3 4B - Autocomplete
     provider: openai
-    model: qwen2.5-coder-3b-instruct
+    model: qwen3-4b
     apiBase: "http://localhost:8000/v1"
     apiKey: "local"
     roles:
@@ -286,21 +287,22 @@ O arquivo `venv-llama-cpp-python-win11-py3.10.2.zip` é publicado na página de 
 
 ## Hardware recomendado (CPU only)
 
-Comparativo para 16 GB de RAM + CPU:
+Comparativo para 16 GB de RAM + CPU (série Qwen3):
 
 | Modelo | Quantização | Tamanho | RAM | Velocidade CPU | Indicado para |
 |---|---|---|---|---|---|
-| Coder 1.5B | `Q4_K_M` | ~1,0 GB | ~2 GB | ~25–35 tok/s | Autocompletar rápido |
-| **Coder 3B** ⭐ | `Q4_K_M` | ~2,0 GB | ~3 GB | ~12–18 tok/s | **Padrão — melhor equilíbrio** |
-| Coder 7B | `Q4_K_M` | ~4,4 GB | ~6 GB | ~5–8 tok/s | Máxima qualidade |
-| Instruct 7B | `Q8_0` | ~7,7 GB | ~10 GB | ~3–5 tok/s | Uso geral, sem foco em código |
+| Qwen3-1.7B | `Q4_K_M` | ~1,1 GB | ~2 GB | ~30–40 tok/s | Autocompletar rápido |
+| **Qwen3-4B** ⭐ | `Q4_K_M` | ~2,6 GB | ~4 GB | ~12–18 tok/s | **Padrão — melhor equilíbrio** |
+| Qwen3-8B | `Q4_K_M` | ~5,2 GB | ~7 GB | ~5–8 tok/s | Máxima qualidade |
+
+> O Qwen3 suporta contexto de até 128k tokens e modo de raciocínio (`/think`). Para uso como assistente de código, o modo padrão (sem `<think>`) já é o adequado — nenhuma configuração extra é necessária.
 
 Para trocar de modelo, edite três variáveis no `.env`:
 
 ```env
-REPO_ID=Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF
-MODEL_FILENAME=qwen2.5-coder-1.5b-instruct-q4_k_m.gguf
-MODEL_ID=qwen2.5-coder-1.5b-instruct
+REPO_ID=Qwen/Qwen3-1.7B-GGUF
+MODEL_FILENAME=qwen3-1.7b-q4_k_m.gguf
+MODEL_ID=qwen3-1.7b
 ```
 
 Ajuste `N_THREADS` para o número de núcleos físicos do seu processador.  
