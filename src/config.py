@@ -9,7 +9,7 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Model
 _model_dir_raw = os.getenv("MODEL_DIR", "model")
 MODEL_DIR = _model_dir_raw if os.path.isabs(_model_dir_raw) else os.path.join(_ROOT, _model_dir_raw)
-MODEL_FILENAME = os.getenv("MODEL_FILENAME", "Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf")
+MODEL_FILENAME = os.getenv("MODEL_FILENAME", "qwen2.5-coder-3b-instruct-q4_k_m.gguf")
 MODEL_PATH = os.path.join(MODEL_DIR, MODEL_FILENAME)
 MODEL_ID = os.getenv("MODEL_ID", "qwen2.5-coder-3b-instruct")
 REPO_ID = os.getenv("REPO_ID", "Qwen/Qwen2.5-Coder-3B-Instruct-GGUF")
