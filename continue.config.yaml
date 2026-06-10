@@ -1,11 +1,11 @@
-name: Qwen Coder GGUF Local
+name: Qwen3 GGUF Local
 version: 1.0.0
 schema: v1
 
 models:
-  - name: Qwen 2.5 Coder 3B - Chat
+  - name: Qwen3 4B - Chat
     provider: openai
-    model: qwen2.5-coder-3b-instruct
+    model: qwen3-4b
     apiBase: "http://localhost:8000/v1"
     apiKey: "local"
     roles:
@@ -18,9 +18,9 @@ models:
       temperature: 0.1
       maxTokens: 512
 
-  - name: Qwen 2.5 Coder 3B - Autocomplete
+  - name: Qwen3 4B - Autocomplete
     provider: openai
-    model: qwen2.5-coder-3b-instruct
+    model: qwen3-4b
     apiBase: "http://localhost:8000/v1"
     apiKey: "local"
     roles:
