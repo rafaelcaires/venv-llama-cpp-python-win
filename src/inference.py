@@ -32,8 +32,12 @@ class LLMInference:
         max_tokens: int = config.MAX_TOKENS,
         temperature: float = config.TEMPERATURE,
     ) -> str:
-        result = self.llm(prompt, max_tokens=max_tokens, temperature=temperature, echo=False)
-        return result["choices"][0]["text"]  # type: ignore[index]
+        try:
+            result = self.llm(prompt, max_tokens=max_tokens, temperature=temperature, echo=False)
+            return result["choices"][0]["text"]  # type: ignore[index]
+        except RuntimeError:
+            self.llm.reset()
+            raise
 
     def chat(
         self,
@@ -41,12 +45,16 @@ class LLMInference:
         max_tokens: int = config.MAX_TOKENS,
         temperature: float = config.TEMPERATURE,
     ) -> str:
-        result = self.llm.create_chat_completion(
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
-        return result["choices"][0]["message"]["content"]  # type: ignore[index]
+        try:
+            result = self.llm.create_chat_completion(
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+            )
+            return result["choices"][0]["message"]["content"]  # type: ignore[index]
+        except RuntimeError:
+            self.llm.reset()
+            raise
 
     def stream_chat(
         self,
@@ -54,9 +62,13 @@ class LLMInference:
         max_tokens: int = config.MAX_TOKENS,
         temperature: float = config.TEMPERATURE,
     ) -> Generator[dict[str, Any], None, None]:
-        return self.llm.create_chat_completion(  # type: ignore[return-value]
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            stream=True,
-        )
+        try:
+            yield from self.llm.create_chat_completion(  # type: ignore[misc]
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                stream=True,
+            )
+        except RuntimeError:
+            self.llm.reset()
+            raise
