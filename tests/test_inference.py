@@ -58,7 +58,12 @@ def test_stream_chat_returns_generator(mock_llama):
 
 
 def test_llama_initialized_with_correct_params(mock_llama):
-    LLMInference(model_path="fake.gguf", n_ctx=2048, n_threads=4, n_gpu_layers=0)
+    LLMInference(model_path="fake.gguf", n_ctx=2048, n_threads=4, n_gpu_layers=0, n_batch=256)
     mock_llama.assert_called_once_with(
-        model_path="fake.gguf", n_ctx=2048, n_threads=4, n_gpu_layers=0, verbose=False
+        model_path="fake.gguf",
+        n_ctx=2048,
+        n_threads=4,
+        n_gpu_layers=0,
+        n_batch=256,
+        verbose=False,
     )
