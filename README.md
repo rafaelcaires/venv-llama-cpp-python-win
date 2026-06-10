@@ -1,7 +1,7 @@
 # venv-llama-cpp-python-win
 
 Ambiente virtual Python 3.10.2 para Windows 11 com `llama-cpp-python` pré-instalado, exposto como uma **API REST compatível com OpenAI** via FastAPI + uvicorn.  
-Integra com extensões de IA no VSCode (como [Continue.dev](https://marketplace.visualstudio.com/items?itemName=Continue.continue)) como alternativa local ao GitHub Copilot.
+Integra com o [Continue.dev](https://marketplace.visualstudio.com/items?itemName=Continue.continue) no VSCode como alternativa local ao GitHub Copilot.
 
 ---
 
@@ -16,7 +16,7 @@ Integra com extensões de IA no VSCode (como [Continue.dev](https://marketplace.
 │   ├── downloader.py   # Download do modelo GGUF do Hugging Face
 │   ├── inference.py    # Wrapper LLMInference (generate, chat, stream_chat)
 │   └── schemas.py      # Modelos Pydantic no formato OpenAI
-├── tests/              # Pytest — 36 testes, 99% de cobertura
+├── tests/              # Pytest — 41 testes, 99% de cobertura
 ├── model/              # Pasta onde o modelo .gguf é salvo (não versionado)
 ├── .env.example        # Template de variáveis de ambiente
 ├── requirements.txt    # Dependências Python
@@ -45,7 +45,8 @@ cp .env.example .env
 | `N_CTX` | `4096` | Tamanho da janela de contexto em tokens |
 | `N_THREADS` | `(núcleos CPU)` | Threads de CPU para inferência |
 | `N_GPU_LAYERS` | `0` | Camadas na GPU (0 = somente CPU) |
-| `TEMPERATURE` | `0.7` | Temperatura de amostragem padrão |
+| `N_BATCH` | `512` | Tokens processados em paralelo no prompt (maior = menor latência, mais RAM) |
+| `TEMPERATURE` | `0.1` | Temperatura de amostragem padrão |
 | `MAX_TOKENS` | `512` | Máximo de tokens por resposta |
 | `HOST` | `0.0.0.0` | Endereço de escuta da API |
 | `PORT` | `8000` | Porta da API |
@@ -53,7 +54,7 @@ cp .env.example .env
 | `AUTO_DOWNLOAD` | `true` | Baixa o modelo automaticamente na primeira execução |
 
 > **Por que o modelo não está no repositório?**  
-> O arquivo `.gguf` tem ~4,4 GB. O GitHub limita arquivos a 100 MB e o Git LFS gratuito a 1 GB.  
+> O arquivo `.gguf` tem ~2 GB. O GitHub limita arquivos a 100 MB e o Git LFS gratuito a 1 GB.  
 > O modelo é baixado automaticamente do Hugging Face na primeira execução da API.
 
 ---
@@ -84,7 +85,7 @@ copy .env.example .env
 .venv\Scripts\uvicorn src.app:app --host 0.0.0.0 --port 8000
 ```
 
-Na primeira execução, o modelo (~4,4 GB) é baixado automaticamente se `AUTO_DOWNLOAD=true`.  
+Na primeira execução, o modelo (~2 GB) é baixado automaticamente se `AUTO_DOWNLOAD=true`.  
 Acesse a documentação interativa em `http://localhost:8000/docs`.
 
 ### 4. Chat via terminal (opcional)
@@ -104,7 +105,7 @@ Para explorar um repo antes de baixar:
 
 ```python
 from src.downloader import list_gguf_files
-print(list_gguf_files("bartowski/Qwen2.5-7B-Instruct-GGUF"))
+print(list_gguf_files("Qwen/Qwen2.5-Coder-3B-Instruct-GGUF"))
 ```
 
 ---
@@ -125,8 +126,8 @@ curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "qwen2.5-coder-3b-instruct",
-    "messages": [{"role": "user", "content": "Olá, como vai?"}],
-    "max_tokens": 256
+    "messages": [{"role": "user", "content": "Explique este código"}],
+    "max_tokens": 512
   }'
 ```
 
@@ -191,6 +192,9 @@ models:
       maxTokens: 256
 ```
 
+> No schema v1 do Continue.dev 1.2+, o `tabAutocompleteModel` foi removido.  
+> O autocomplete é configurado adicionando `roles: [autocomplete]` em uma entrada de `models`.
+
 #### Por que esses valores?
 
 | Parâmetro | Chat | Autocomplete | Motivo |
@@ -211,7 +215,7 @@ models:
 .venv\Scripts\pytest tests/ --cov=src --cov-report=term-missing
 ```
 
-- **36 testes** cobrindo API, inferência, download e chat
+- **41 testes** cobrindo API, inferência, download e chat
 - **99% de cobertura** de código
 - Não requer o modelo instalado — `llama_cpp` e `huggingface_hub` são mockados
 
@@ -259,7 +263,7 @@ Comparativo para 16 GB de RAM + CPU:
 | Coder 7B | `Q4_K_M` | ~4,4 GB | ~6 GB | ~5–8 tok/s | Máxima qualidade |
 | Instruct 7B | `Q8_0` | ~7,7 GB | ~10 GB | ~3–5 tok/s | Uso geral, sem foco em código |
 
-Para trocar de modelo, edite duas variáveis no `.env`:
+Para trocar de modelo, edite três variáveis no `.env`:
 
 ```env
 REPO_ID=Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF
@@ -267,4 +271,5 @@ MODEL_FILENAME=qwen2.5-coder-1.5b-instruct-q4_k_m.gguf
 MODEL_ID=qwen2.5-coder-1.5b-instruct
 ```
 
-Ajuste `N_THREADS` para o número de núcleos físicos do seu processador.
+Ajuste `N_THREADS` para o número de núcleos físicos do seu processador.  
+Para reduzir a latência do prompt, aumente `N_BATCH` para `1024` se tiver RAM disponível.
