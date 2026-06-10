@@ -162,7 +162,7 @@ version: 1.0.0
 schema: v1
 
 models:
-  - name: Qwen 2.5 Coder 3B (local)
+  - name: Qwen 2.5 Coder 3B - Chat
     provider: openai
     model: qwen2.5-coder-3b-instruct
     apiBase: "http://localhost:8000/v1"
@@ -177,17 +177,18 @@ models:
       temperature: 0.1
       maxTokens: 512
 
-tabAutocompleteModel:
-  name: Qwen 2.5 Coder 3B Autocomplete
-  provider: openai
-  model: qwen2.5-coder-3b-instruct
-  apiBase: "http://localhost:8000/v1"
-  apiKey: "local"
-  requestOptions:
-    timeout: 30
-  defaultCompletionOptions:
-    temperature: 0.0
-    maxTokens: 256
+  - name: Qwen 2.5 Coder 3B - Autocomplete
+    provider: openai
+    model: qwen2.5-coder-3b-instruct
+    apiBase: "http://localhost:8000/v1"
+    apiKey: "local"
+    roles:
+      - autocomplete
+    requestOptions:
+      timeout: 30
+    defaultCompletionOptions:
+      temperature: 0.0
+      maxTokens: 256
 ```
 
 #### Por que esses valores?
