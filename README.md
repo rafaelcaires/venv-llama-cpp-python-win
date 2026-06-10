@@ -38,10 +38,10 @@ cp .env.example .env
 
 | Variável | Padrão | Descrição |
 |---|---|---|
-| `MODEL_FILENAME` | `Qwen2.5-7B-Instruct-Q4_K_M.gguf` | Nome do arquivo GGUF |
+| `MODEL_FILENAME` | `Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf` | Nome do arquivo GGUF |
 | `MODEL_DIR` | `model` | Pasta onde o modelo é armazenado |
-| `MODEL_ID` | `qwen2.5-7b-instruct` | ID reportado pelo endpoint `/v1/models` |
-| `REPO_ID` | `bartowski/Qwen2.5-7B-Instruct-GGUF` | Repositório do Hugging Face |
+| `MODEL_ID` | `qwen2.5-coder-3b-instruct` | ID reportado pelo endpoint `/v1/models` |
+| `REPO_ID` | `Qwen/Qwen2.5-Coder-3B-Instruct-GGUF` | Repositório do Hugging Face |
 | `N_CTX` | `4096` | Tamanho da janela de contexto em tokens |
 | `N_THREADS` | `(núcleos CPU)` | Threads de CPU para inferência |
 | `N_GPU_LAYERS` | `0` | Camadas na GPU (0 = somente CPU) |
@@ -158,16 +158,16 @@ Edite `~/.continue/config.yaml` (ou `%USERPROFILE%\.continue\config.yaml` no Win
 
 ```yaml
 models:
-  - title: Qwen 2.5 7B (local)
+  - title: Qwen 2.5 Coder 3B (local)
     provider: openai
-    model: qwen2.5-7b-instruct
+    model: qwen2.5-coder-3b-instruct
     apiBase: http://localhost:8000
     apiKey: local
 
 tabAutocompleteModel:
-  title: Qwen 2.5 7B Autocomplete
+  title: Qwen 2.5 Coder 3B Autocomplete
   provider: openai
-  model: qwen2.5-7b-instruct
+  model: qwen2.5-coder-3b-instruct
   apiBase: http://localhost:8000
   apiKey: local
 ```
@@ -223,11 +223,21 @@ O arquivo `venv-llama-cpp-python-win11-py3.10.2.zip` é publicado na página de 
 
 ## Hardware recomendado (CPU only)
 
-| Quantização | Tamanho | RAM necessária | Velocidade |
-|---|---|---|---|
-| `Q4_K_M` *(padrão)* | ~4,4 GB | ~6 GB | Melhor custo-benefício |
-| `Q5_K_M` | ~5,2 GB | ~7 GB | Melhor qualidade |
-| `Q8_0` | ~7,7 GB | ~10 GB | Quase sem perda |
+Comparativo para 16 GB de RAM + CPU:
 
-Para uma máquina com **16 GB de RAM e CPU**, `Q4_K_M` ou `Q5_K_M` são as escolhas ideais.  
-Ajuste `N_THREADS` no `.env` para o número de núcleos físicos do seu processador.
+| Modelo | Quantização | Tamanho | RAM | Velocidade CPU | Indicado para |
+|---|---|---|---|---|---|
+| Coder 1.5B | `Q4_K_M` | ~1,0 GB | ~2 GB | ~25–35 tok/s | Autocompletar rápido |
+| **Coder 3B** ⭐ | `Q4_K_M` | ~2,0 GB | ~3 GB | ~12–18 tok/s | **Padrão — melhor equilíbrio** |
+| Coder 7B | `Q4_K_M` | ~4,4 GB | ~6 GB | ~5–8 tok/s | Máxima qualidade |
+| Instruct 7B | `Q8_0` | ~7,7 GB | ~10 GB | ~3–5 tok/s | Uso geral, sem foco em código |
+
+Para trocar de modelo, edite duas variáveis no `.env`:
+
+```env
+REPO_ID=Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF
+MODEL_FILENAME=Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf
+MODEL_ID=qwen2.5-coder-1.5b-instruct
+```
+
+Ajuste `N_THREADS` para o número de núcleos físicos do seu processador.
