@@ -155,7 +155,18 @@ Use a extensão **[Continue.dev](https://marketplace.visualstudio.com/items?item
 
 ### Configuração do Continue.dev
 
-Edite `~/.continue/config.yaml` (ou `%USERPROFILE%\.continue\config.yaml` no Windows):
+O arquivo `continue.config.yaml` na raiz do projeto contém a configuração completa pronta para uso.  
+Copie-o para `~/.continue/config.yaml` (macOS/Linux) ou `%USERPROFILE%\.continue\config.yaml` (Windows):
+
+```bash
+# macOS / Linux
+cp continue.config.yaml ~/.continue/config.yaml
+
+# Windows
+copy continue.config.yaml %USERPROFILE%\.continue\config.yaml
+```
+
+Conteúdo completo do arquivo:
 
 ```yaml
 name: Qwen Coder GGUF Local
@@ -190,6 +201,15 @@ models:
     defaultCompletionOptions:
       temperature: 0.0
       maxTokens: 256
+
+context:
+  - provider: code
+  - provider: docs
+  - provider: diff
+  - provider: terminal
+  - provider: problems
+  - provider: folder
+  - provider: codebase
 ```
 
 > No schema v1 do Continue.dev 1.2+, o `tabAutocompleteModel` foi removido.  
@@ -202,6 +222,18 @@ models:
 | `maxTokens` | 512 | 256 | Menos tokens = resposta mais rápida |
 | `temperature` | 0.1 | 0.0 | Código precisa de determinismo, não criatividade |
 | `timeout` | 120s | 30s | Autocomplete deve ser rápido ou desistir |
+
+#### Provedores de contexto (`context`)
+
+| Provider | Atalho no chat | O que fornece |
+|---|---|---|
+| `code` | `@code` | Funções e classes do projeto |
+| `docs` | `@docs` | Documentação de bibliotecas |
+| `diff` | `@diff` | Alterações não commitadas |
+| `terminal` | `@terminal` | Saída do terminal integrado |
+| `problems` | `@problems` | Erros e avisos do editor |
+| `folder` | `@folder` | Arquivos de uma pasta |
+| `codebase` | `@codebase` | Busca semântica no projeto inteiro |
 
 ---
 
