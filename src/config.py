@@ -15,7 +15,7 @@ MODEL_ID = os.getenv("MODEL_ID", "qwen3-4b")
 REPO_ID = os.getenv("REPO_ID", "Qwen/Qwen3-4B-GGUF")
 
 # Inference
-N_CTX = int(os.getenv("N_CTX", "4096"))
+N_CTX = int(os.getenv("N_CTX", "8192"))
 N_THREADS = int(os.getenv("N_THREADS", str(os.cpu_count() or 4)))
 N_GPU_LAYERS = int(os.getenv("N_GPU_LAYERS", "0"))
 N_BATCH = int(os.getenv("N_BATCH", "512"))

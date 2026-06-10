@@ -67,3 +67,33 @@ def test_llama_initialized_with_correct_params(mock_llama):
         n_batch=256,
         verbose=False,
     )
+
+
+def test_generate_resets_on_runtime_error(mock_llama):
+    mock_llama.return_value.return_value = None
+    mock_llama.return_value.side_effect = RuntimeError("llama_decode returned -3")
+    llm = LLMInference(model_path="fake.gguf")
+    with pytest.raises(RuntimeError):
+        llm.generate("prompt")
+    mock_llama.return_value.reset.assert_called_once()
+
+
+def test_chat_resets_on_runtime_error(mock_llama):
+    err = RuntimeError("llama_decode returned -3")
+    mock_llama.return_value.create_chat_completion.side_effect = err
+    llm = LLMInference(model_path="fake.gguf")
+    with pytest.raises(RuntimeError):
+        llm.chat([{"role": "user", "content": "hi"}])
+    mock_llama.return_value.reset.assert_called_once()
+
+
+def test_stream_chat_resets_on_runtime_error(mock_llama):
+    def _failing_iter(*_args: object, **_kwargs: object):
+        raise RuntimeError("llama_decode returned -3")
+        yield  # make it a generator
+
+    mock_llama.return_value.create_chat_completion.side_effect = _failing_iter
+    llm = LLMInference(model_path="fake.gguf")
+    with pytest.raises(RuntimeError):
+        list(llm.stream_chat([{"role": "user", "content": "hi"}]))
+    mock_llama.return_value.reset.assert_called_once()

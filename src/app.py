@@ -7,9 +7,9 @@ import uuid
 from collections.abc import Generator
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, StreamingResponse
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from src import config
 from src.downloader import download_model
@@ -51,6 +51,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(RuntimeError)
+async def runtime_error_handler(request: Request, exc: RuntimeError) -> JSONResponse:
+    return JSONResponse(
+        status_code=503,
+        content={"error": {"message": str(exc), "type": "context_length_exceeded"}},
+    )
 
 
 # ---------- dependencies ----------
