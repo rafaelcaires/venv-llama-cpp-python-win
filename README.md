@@ -154,27 +154,22 @@ Use a extensão **[Continue.dev](https://marketplace.visualstudio.com/items?item
 
 ### Configuração do Continue.dev
 
-Edite `~/.continue/config.json` (ou `%USERPROFILE%\.continue\config.json` no Windows):
+Edite `~/.continue/config.yaml` (ou `%USERPROFILE%\.continue\config.yaml` no Windows):
 
-```json
-{
-  "models": [
-    {
-      "title": "Qwen 2.5 7B (local)",
-      "provider": "openai",
-      "model": "qwen2.5-7b-instruct",
-      "apiBase": "http://localhost:8000",
-      "apiKey": "local"
-    }
-  ],
-  "tabAutocompleteModel": {
-    "title": "Qwen 2.5 7B Autocomplete",
-    "provider": "openai",
-    "model": "qwen2.5-7b-instruct",
-    "apiBase": "http://localhost:8000",
-    "apiKey": "local"
-  }
-}
+```yaml
+models:
+  - title: Qwen 2.5 7B (local)
+    provider: openai
+    model: qwen2.5-7b-instruct
+    apiBase: http://localhost:8000
+    apiKey: local
+
+tabAutocompleteModel:
+  title: Qwen 2.5 7B Autocomplete
+  provider: openai
+  model: qwen2.5-7b-instruct
+  apiBase: http://localhost:8000
+  apiKey: local
 ```
 
 ---
