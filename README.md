@@ -39,7 +39,7 @@ cp .env.example .env
 
 | Variável | Padrão | Descrição |
 |---|---|---|
-| `MODEL_FILENAME` | `qwen3-4b-q4_k_m.gguf` | Nome do arquivo GGUF |
+| `MODEL_FILENAME` | `Qwen3-4B-Q4_K_M.gguf` | Nome do arquivo GGUF |
 | `MODEL_DIR` | `model` | Pasta onde o modelo é armazenado |
 | `MODEL_ID` | `qwen3-4b` | ID reportado pelo endpoint `/v1/models` |
 | `REPO_ID` | `Qwen/Qwen3-4B-GGUF` | Repositório do Hugging Face |
@@ -301,7 +301,7 @@ Para trocar de modelo, edite três variáveis no `.env`:
 
 ```env
 REPO_ID=Qwen/Qwen3-1.7B-GGUF
-MODEL_FILENAME=qwen3-1.7b-q4_k_m.gguf
+MODEL_FILENAME=Qwen3-1.7B-Q4_K_M.gguf
 MODEL_ID=qwen3-1.7b
 ```
 
