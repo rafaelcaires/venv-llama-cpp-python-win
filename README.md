@@ -38,10 +38,10 @@ cp .env.example .env
 
 | Variável | Padrão | Descrição |
 |---|---|---|
-| `MODEL_FILENAME` | `qwen2.5-7b-instruct-q4_k_m.gguf` | Nome do arquivo GGUF |
+| `MODEL_FILENAME` | `Qwen2.5-7B-Instruct-Q4_K_M.gguf` | Nome do arquivo GGUF |
 | `MODEL_DIR` | `model` | Pasta onde o modelo é armazenado |
 | `MODEL_ID` | `qwen2.5-7b-instruct` | ID reportado pelo endpoint `/v1/models` |
-| `REPO_ID` | `Qwen/Qwen2.5-7B-Instruct-GGUF` | Repositório do Hugging Face |
+| `REPO_ID` | `bartowski/Qwen2.5-7B-Instruct-GGUF` | Repositório do Hugging Face |
 | `N_CTX` | `4096` | Tamanho da janela de contexto em tokens |
 | `N_THREADS` | `(núcleos CPU)` | Threads de CPU para inferência |
 | `N_GPU_LAYERS` | `0` | Camadas na GPU (0 = somente CPU) |
@@ -97,6 +97,14 @@ Acesse a documentação interativa em `http://localhost:8000/docs`.
 
 ```bat
 .venv\Scripts\python -m src.downloader
+```
+
+Se ocorrer erro 404, o downloader lista automaticamente os arquivos disponíveis no repositório.  
+Para explorar um repo antes de baixar:
+
+```python
+from src.downloader import list_gguf_files
+print(list_gguf_files("bartowski/Qwen2.5-7B-Instruct-GGUF"))
 ```
 
 ---
