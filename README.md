@@ -256,7 +256,14 @@ context:
 
 ## Release do .venv
 
-O workflow `build-release.yml` gera automaticamente um `.venv` com `llama-cpp-python` pré-compilado para Windows 11.
+O workflow `build-release.yml` gera automaticamente **dois builds** de `.venv` com `llama-cpp-python` pré-compilado para Windows 11:
+
+| Arquivo | Backend | Indicado para |
+|---|---|---|
+| `*-cpu.zip` | CPU only | Qualquer máquina |
+| `*-vulkan.zip` | Vulkan (GPU) | Intel Iris Xe / AMD Radeon integrada |
+
+> O build Vulkan já inclui todas as dependências — não é necessário rodar `pip install -r requirements.txt` após extrair.
 
 ### Via tag (recomendado)
 
@@ -269,11 +276,11 @@ git push origin v1.0.0
 
 GitHub → Actions → "Build venv llama-cpp-python (Windows)" → **Run workflow**
 
-O arquivo `venv-llama-cpp-python-win11-py3.10.2.zip` é publicado na página de [Releases](../../releases).
+Os arquivos são publicados na página de [Releases](../../releases).
 
 ### Como usar o release
 
-1. Baixe e extraia o `.zip` na raiz do projeto
+1. Baixe e extraia o `.zip` adequado ao seu hardware na raiz do projeto
 2. Ative o ambiente:
    ```bat
    .venv\Scripts\activate
@@ -282,6 +289,25 @@ O arquivo `venv-llama-cpp-python-win11-py3.10.2.zip` é publicado na página de 
    ```bat
    python -m venv --upgrade .venv
    ```
+
+### Configuração para GPU integrada (build Vulkan)
+
+No `.env`, configure:
+
+```env
+N_GPU_LAYERS=20   # Offload ~20 camadas para Intel Iris Xe / Radeon
+N_BATCH=1024      # Maior batch aproveita melhor a GPU
+N_THREADS=4       # Libera núcleos para o sistema
+```
+
+Ao iniciar a API, confirme o backend nos logs:
+
+```
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: Intel(R) Iris(R) Xe Graphics
+```
+
+Ganho esperado vs CPU: **~10–30% mais tokens/s** para modelos Q4_K_M.
 
 ---
 

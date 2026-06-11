@@ -13,15 +13,24 @@ on:
 
 jobs:
   build:
-    name: Build & Release (Windows 11)
+    name: Build — ${{ matrix.backend }}
     runs-on: windows-latest
     permissions:
       contents: write
 
+    strategy:
+      matrix:
+        include:
+          - backend: cpu
+            artifact: venv-llama-cpp-python-win11-py3.10.2-cpu.zip
+            wheel_index: https://abetlen.github.io/llama-cpp-python/whl/cpu
+          - backend: vulkan
+            artifact: venv-llama-cpp-python-win11-py3.10.2-vulkan.zip
+            wheel_index: https://abetlen.github.io/llama-cpp-python/whl/vulkan
+
     env:
       PYTHON_VERSION: "3.10.2"
       VENV_DIR: ".venv"
-      ARTIFACT_NAME: "venv-llama-cpp-python-win11-py3.10.2.zip"
 
     steps:
       - name: Checkout
@@ -38,31 +47,35 @@ jobs:
       - name: Create virtual environment
         run: python -m venv ${{ env.VENV_DIR }}
 
-      - name: Upgrade pip inside venv
+      - name: Upgrade pip
         run: ${{ env.VENV_DIR }}\Scripts\python -m pip install --upgrade pip
 
-      - name: Install llama-cpp-python (pre-built CPU wheel)
+      - name: Install llama-cpp-python (${{ matrix.backend }})
+        id: install_llama
+        run: |
+          ${{ env.VENV_DIR }}\Scripts\pip install llama-cpp-python `
+            --extra-index-url ${{ matrix.wheel_index }}
+        continue-on-error: true
+
+      - name: Fallback — install llama-cpp-python (CPU)
+        if: steps.install_llama.outcome == 'failure'
         run: |
           ${{ env.VENV_DIR }}\Scripts\pip install llama-cpp-python `
             --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
-        continue-on-error: true
-        id: install_prebuilt
 
-      - name: Install llama-cpp-python (compile from source fallback)
-        if: steps.install_prebuilt.outcome == 'failure'
+      - name: Install remaining dependencies
         run: |
-          ${{ env.VENV_DIR }}\Scripts\pip install llama-cpp-python
-        env:
-          CMAKE_ARGS: "-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
+          ${{ env.VENV_DIR }}\Scripts\pip install `
+            huggingface-hub fastapi "uvicorn[standard]" python-dotenv pytest httpx
 
       - name: Verify installation
-        run: ${{ env.VENV_DIR }}\Scripts\python -c "import llama_cpp; print('llama_cpp version:', llama_cpp.__version__)"
+        run: ${{ env.VENV_DIR }}\Scripts\python -c "import llama_cpp; print('llama_cpp:', llama_cpp.__version__)"
 
       - name: Compress .venv
-        run: Compress-Archive -Path ${{ env.VENV_DIR }} -DestinationPath ${{ env.ARTIFACT_NAME }} -Force
+        run: Compress-Archive -Path ${{ env.VENV_DIR }} -DestinationPath ${{ matrix.artifact }} -Force
 
       - name: Show artifact size
-        run: (Get-Item ${{ env.ARTIFACT_NAME }}).Length / 1MB | ForEach-Object { "{0:N2} MB" -f $_ }
+        run: (Get-Item ${{ matrix.artifact }}).Length / 1MB | ForEach-Object { "{0:N2} MB" -f $_ }
 
       - name: Determine release tag
         id: tag
@@ -73,7 +86,7 @@ jobs:
             echo "name=${{ github.ref_name }}" >> $env:GITHUB_OUTPUT
           }
 
-      - name: Create GitHub Release
+      - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.name }}
@@ -83,22 +96,41 @@ jobs:
 
             **Python:** 3.10.2
             **OS:** Windows 11
-            **Libs:** `llama-cpp-python` (CPU)
+
+            | Arquivo | Backend | Indicado para |
+            |---|---|---|
+            | `*-cpu.zip` | CPU only | Qualquer máquina |
+            | `*-vulkan.zip` | Vulkan (GPU) | Intel Iris Xe / AMD Radeon integrada |
 
             ### Como usar
 
-            1. Baixe e extraia o `.zip` na raiz do seu projeto
+            1. Baixe o `.zip` adequado ao seu hardware e extraia na raiz do projeto
             2. Ative o ambiente:
                ```bat
                .venv\Scripts\activate
                ```
-            3. Use normalmente.
+            3. Todas as dependências já estão incluídas — não é necessário rodar `pip install`.
 
-            > **Nota:** O `.venv` usa caminhos absolutos internamente. Após extrair, pode ser necessário recriar scripts de ativação:
+            > **Nota:** O `.venv` usa caminhos absolutos. Se mover de pasta, execute:
             > ```bat
             > python -m venv --upgrade .venv
             > ```
-          files: ${{ env.ARTIFACT_NAME }}
+
+            ### Configuração para GPU integrada (build Vulkan)
+
+            No `.env`, configure:
+            ```env
+            N_GPU_LAYERS=20
+            N_BATCH=1024
+            N_THREADS=4
+            ```
+
+            Nos logs da API deve aparecer:
+            ```
+            ggml_vulkan: Found 1 Vulkan devices:
+            ggml_vulkan: Intel(R) Iris(R) Xe Graphics
+            ```
+          files: ${{ matrix.artifact }}
           draft: false
           prerelease: false
         env:
