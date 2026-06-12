@@ -220,9 +220,9 @@ context:
 
 | Parâmetro | Chat | Autocomplete | Motivo |
 |---|---|---|---|
-| `maxTokens` | 512 | 256 | Menos tokens = resposta mais rápida |
+| `maxTokens` | 256 | 64 | Menos tokens = resposta mais rápida; autocomplete raramente precisa de mais |
 | `temperature` | 0.1 | 0.0 | Código precisa de determinismo, não criatividade |
-| `timeout` | 120s | 30s | Autocomplete deve ser rápido ou desistir |
+| `timeout` | 180s | 20s | Autocomplete deve ser rápido ou desistir logo |
 
 #### Provedores de contexto (`context`)
 
@@ -313,23 +313,25 @@ Ganho esperado vs CPU: **~10–30% mais tokens/s** para modelos Q4_K_M.
 
 ## Hardware recomendado (CPU only)
 
-Comparativo para 16 GB de RAM + CPU (série Qwen3):
+Escolha o modelo pelo desempenho do processador:
 
-| Modelo | Quantização | Tamanho | RAM | Velocidade CPU | Indicado para |
-|---|---|---|---|---|---|
-| Qwen3-1.7B | `Q4_K_M` | ~1,1 GB | ~2 GB | ~30–40 tok/s | Autocompletar rápido |
-| **Qwen3-4B** ⭐ | `Q4_K_M` | ~2,6 GB | ~4 GB | ~12–18 tok/s | **Padrão — melhor equilíbrio** |
-| Qwen3-8B | `Q4_K_M` | ~5,2 GB | ~7 GB | ~5–8 tok/s | Máxima qualidade |
+| CPU | Modelo recomendado | Tamanho | Velocidade estimada | Resposta (256 tokens) |
+|---|---|---|---|---|
+| **Intel série-N, Celeron, Pentium** | **Qwen3-1.7B** ⭐ | ~1,1 GB | ~5–10 tok/s | ~25–50 s |
+| Core i5/i7, Ryzen 5 (8–16 GB RAM) | Qwen3-4B | ~2,6 GB | ~12–18 tok/s | ~14–21 s |
+| Core i7/i9, Ryzen 7/9 (16+ GB RAM) | Qwen3-8B | ~5,2 GB | ~5–8 tok/s | ~32–51 s |
+
+> **CPU série-N (ex: Positivo N8440):** use sempre o Qwen3-1.7B. O Qwen3-4B a 2–4 tok/s gera ~4 minutos por resposta — inviável para uso interativo.
 
 > O Qwen3 suporta contexto de até 128k tokens e modo de raciocínio (`/think`). Para uso como assistente de código, o modo padrão (sem `<think>`) já é o adequado — nenhuma configuração extra é necessária.
 
 Para trocar de modelo, edite três variáveis no `.env`:
 
 ```env
-REPO_ID=Qwen/Qwen3-1.7B-GGUF
-MODEL_FILENAME=Qwen3-1.7B-Q4_K_M.gguf
-MODEL_ID=qwen3-1.7b
+REPO_ID=Qwen/Qwen3-4B-GGUF
+MODEL_FILENAME=Qwen3-4B-Q4_K_M.gguf
+MODEL_ID=qwen3-4b
 ```
 
-Ajuste `N_THREADS` para o número de núcleos físicos do seu processador.  
-Para reduzir a latência do prompt, aumente `N_BATCH` para `1024` se tiver RAM disponível.
+Ajuste `N_THREADS` para o número de **núcleos físicos** (não lógicos/HT) do processador.  
+Mantenha `N_CTX=2048` em hardware limitado — aumentar para 8192 reduz a velocidade de inferência.
