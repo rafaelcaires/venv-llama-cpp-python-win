@@ -22,3 +22,6 @@ htmlcov/
 
 # Artifacts
 *.zip
+
+# Outhers
+.DS_Store
