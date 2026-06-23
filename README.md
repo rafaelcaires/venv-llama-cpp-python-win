@@ -317,11 +317,13 @@ Escolha o modelo pelo desempenho do processador:
 
 | CPU | Modelo recomendado | Tamanho | Velocidade estimada | Resposta (256 tokens) |
 |---|---|---|---|---|
-| **Intel série-N, Celeron, Pentium** | **Qwen3-1.7B** ⭐ | ~1,1 GB | ~5–10 tok/s | ~25–50 s |
+| **Intel série-N, Celeron, Pentium** | **Qwen3-1.7B** ⭐ | ~1,8 GB | ~4–8 tok/s | ~32–64 s |
 | Core i5/i7, Ryzen 5 (8–16 GB RAM) | Qwen3-4B | ~2,6 GB | ~12–18 tok/s | ~14–21 s |
 | Core i7/i9, Ryzen 7/9 (16+ GB RAM) | Qwen3-8B | ~5,2 GB | ~5–8 tok/s | ~32–51 s |
 
 > **CPU série-N (ex: Positivo N8440):** use sempre o Qwen3-1.7B. O Qwen3-4B a 2–4 tok/s gera ~4 minutos por resposta — inviável para uso interativo.
+
+> **Quant por modelo:** o repositório oficial `Qwen/Qwen3-1.7B-GGUF` publica somente o quant `Q8_0` (`Qwen3-1.7B-Q8_0.gguf`). Os modelos maiores (`Qwen3-4B-GGUF`, `Qwen3-8B-GGUF`) usam `Q4_K_M`. Por isso o `.env.example` já vem com o nome de arquivo correto para cada tier.
 
 > O Qwen3 suporta contexto de até 128k tokens e modo de raciocínio (`/think`). Para uso como assistente de código, o modo padrão (sem `<think>`) já é o adequado — nenhuma configuração extra é necessária.
 
